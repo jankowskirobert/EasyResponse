@@ -3,6 +3,7 @@ package com.easyrr.EasyResponse;
 public class DemoEasyService implements EasyService {
 
 	private String path;
+	private EasyContext context;
 
 	public String getServicePath() {
 		return path;
@@ -22,6 +23,10 @@ public class DemoEasyService implements EasyService {
 
 	public void configurePath(String path) {
 		this.path = path;		
+	}
+
+	public void updateServiceContext(EasyContext context) {
+		this.context = context;	
 	}
 	
 }

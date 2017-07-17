@@ -1,5 +1,5 @@
 package com.easyrr.EasyResponse;
 
-public interface EasyResponse {
-
+public class EasyResponse {
+	private EasyStatus status;
 }

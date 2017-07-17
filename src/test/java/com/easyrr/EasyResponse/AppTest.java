@@ -52,7 +52,20 @@ public class AppTest {
 //		request.onResponseFrom(requestPath).thenDo(new DemoEasyAction());
 		ResponseWithTimeout responseWithTimeOut = new ResponseWithTimeout(responseTimeout);
 	}
+	@Test
+	public void serviceRequestToOtherService_longAction() throws URISyntaxException {
+		EasyContext context = new EasyApplicationOnAnnotation();
+		EasyService firstDemoService = new DemoEasyService();
+		firstDemoService.configurePath("demo1");
+		EasyService secondDemoService = new DemoEasyService();
+		secondDemoService.configurePath("demo2");
+		context.register(firstDemoService);
+		context.register(secondDemoService);
 
+		EasyRequest request = new EasyRequest(context, new RequestConfigurationFactory());		
+		EasyResponse response = request.to("demo/demo_path_nope").send().get();
+		
+	}
 	@Test
 	public void testApp() throws URISyntaxException {
 		EasyContext context = new EasyApplicationOnAnnotation();

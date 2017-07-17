@@ -14,6 +14,7 @@ public class EasyApplicationOnAnnotation implements EasyContext {
 		String servicePath = firstDemoService.getServicePath();
 		if (servicePath != null && !servicePath.isEmpty()) {
 			this.registredServices.add(firstDemoService);
+			firstDemoService.updateServiceContext(this);
 		}
 	}
 
