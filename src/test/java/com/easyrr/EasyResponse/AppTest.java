@@ -6,6 +6,9 @@ import java.net.URISyntaxException;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.easyrr.EasyResponse.request.EasyRequest;
+import com.easyrr.EasyResponse.request.RequestConfigurationFactory;
+
 /**
  * Unit test for simple App.
  */
@@ -35,6 +38,22 @@ public class AppTest {
 	}
 
 	@Test
+	public void requestThrowsExceptionIfThereIsAnyServiceHandleIt() throws URISyntaxException {
+		EasyContext context = new EasyApplicationOnAnnotation();
+		long responseTimeout = 1000; // ms
+
+		// insulation
+		EasyService firstDemoService = new DemoEasyService();
+		context.register(firstDemoService);
+		// insulation
+
+		EasyRequest request = new EasyRequest(context, new RequestConfigurationFactory());
+		EasyResponse response = request.to("demo/demo_path_nope").send().andDoWhenRespond(new DemoEasyAction()).get();
+//		request.onResponseFrom(requestPath).thenDo(new DemoEasyAction());
+		ResponseWithTimeout responseWithTimeOut = new ResponseWithTimeout(responseTimeout);
+	}
+
+	@Test
 	public void testApp() throws URISyntaxException {
 		EasyContext context = new EasyApplicationOnAnnotation();
 		long responseTimeout = 1000; // ms
@@ -46,7 +65,7 @@ public class AppTest {
 
 		EasyRequest request = new EasyRequest(context, new RequestConfigurationFactory());
 		URI requestPath = new URI("demo/demo_path_nope");
-		EasyResponse response = request.send(requestPath).andDoWhenRespond(new DemoEasyAction()).get();
+		EasyResponse response = request.to(requestPath).send().andDoWhenRespond(new DemoEasyAction()).get();
 		request.onResponseFrom(requestPath).thenDo(new DemoEasyAction());
 		ResponseWithTimeout responseWithTimeOut = new ResponseWithTimeout(responseTimeout);
 	}

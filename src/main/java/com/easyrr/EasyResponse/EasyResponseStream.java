@@ -16,4 +16,9 @@ public class EasyResponseStream implements ResponseStream {
 		
 	}
 
+	public EasyResponse get() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

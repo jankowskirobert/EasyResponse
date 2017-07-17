@@ -1,9 +1,11 @@
 package com.easyrr.EasyResponse;
 
+import java.net.URI;
 import java.util.List;
 
 public interface EasyContext {
 
-	void register(EasyService firstDemoService);
+	public void register(EasyService firstDemoService);
 	public List<EasyService> getRegistredServices();
+	public EasyStatus call(URI path);
 }
