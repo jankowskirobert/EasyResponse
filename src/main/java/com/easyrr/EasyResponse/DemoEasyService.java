@@ -2,8 +2,10 @@ package com.easyrr.EasyResponse;
 
 public class DemoEasyService implements EasyService {
 
+	private String path;
+
 	public String getServicePath() {
-		return "demo";
+		return path;
 	}
 
 	@EasyRegistredAction(path = "demo_path_nope")
@@ -16,6 +18,10 @@ public class DemoEasyService implements EasyService {
 		String response = "I WILL BACK";
 		System.out.println(response);
 		return response;
+	}
+
+	public void configurePath(String path) {
+		this.path = path;		
 	}
 	
 }

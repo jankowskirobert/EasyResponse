@@ -1,6 +1,7 @@
 package com.easyrr.EasyResponse;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 
 public class EasyRequest {
 
@@ -9,6 +10,10 @@ public class EasyRequest {
 	}
 
 	public RequestStream send(URI requestPath) {
+		return new EasyRequestStream(requestPath);
+	}
+	
+	public RequestStream send(String requestPath) throws URISyntaxException {
 		return new EasyRequestStream(requestPath);
 	}
 
