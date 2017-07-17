@@ -12,7 +12,7 @@ import com.easyrr.EasyResponse.EasyResponse;
 import com.easyrr.EasyResponse.EasyStatus;
 import com.easyrr.EasyResponse.ResponseStream;
 
-public class EasyRequestStream implements RequestStream, AcceptedRequestStream, Observer {
+public class EasyRequestStream implements AcceptedRequestStream, RequestObserver {
 
 	private EasyContext context;
 	private URI requestPath;
@@ -39,20 +39,20 @@ public class EasyRequestStream implements RequestStream, AcceptedRequestStream, 
 	}
 
 	public AcceptedRequestStream send() {
-		status = context.call(requestPath);
+		status = context.call(requestPath, this);
+		System.out.println(status);
 		return this;
 	}
 
-	public RequestStream validate() throws EasyRequestException {
+	public AcceptedRequestStream validate() throws EasyRequestException {
 		if (status.equals(EasyStatus.REJECTED)) {
 			throw new EasyRequestException("Request Rejected");
 		} else
 			return this;
 	}
 
-	public void update(Observable arg0, Object arg1) {
-		// TODO Auto-generated method stub
-
+	public void updateRequestStatus(EasyStatus status) {
+		// TODO Auto-generated method stub		
 	}
 
 }

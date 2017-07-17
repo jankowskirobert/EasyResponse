@@ -4,9 +4,11 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.easyrr.EasyResponse.request.EasyRequest;
+import com.easyrr.EasyResponse.request.EasyRequestException;
 import com.easyrr.EasyResponse.request.RequestConfigurationFactory;
 
 /**
@@ -37,23 +39,19 @@ public class AppTest {
 		Assert.assertFalse(context.getRegistredServices().contains(firstDemoService));
 	}
 
-	@Test
-	public void requestThrowsExceptionIfThereIsAnyServiceHandleIt() throws URISyntaxException {
+	@Test(expected=EasyRequestException.class)
+	public void requestThrowsExceptionIfThereIsAnyServiceHandleIt() throws URISyntaxException, EasyRequestException {
 		EasyContext context = new EasyApplicationOnAnnotation();
-		long responseTimeout = 1000; // ms
-
 		// insulation
-		EasyService firstDemoService = new DemoEasyService();
+		EasyService firstDemoService = new DemoEasyService();		
+		firstDemoService.configurePath("good");
 		context.register(firstDemoService);
 		// insulation
-
 		EasyRequest request = new EasyRequest(context, new RequestConfigurationFactory());
-		EasyResponse response = request.to("demo/demo_path_nope").send().andDoWhenRespond(new DemoEasyAction()).get();
-//		request.onResponseFrom(requestPath).thenDo(new DemoEasyAction());
-		ResponseWithTimeout responseWithTimeOut = new ResponseWithTimeout(responseTimeout);
+		EasyResponse response = request.to("bad/nothing").send().validate().get();
 	}
 	@Test
-	public void serviceRequestToOtherService_longAction() throws URISyntaxException {
+	public void serviceRequestToOtherService_longAction() throws URISyntaxException, EasyRequestException {
 		EasyContext context = new EasyApplicationOnAnnotation();
 		EasyService firstDemoService = new DemoEasyService();
 		firstDemoService.configurePath("demo1");
@@ -63,9 +61,10 @@ public class AppTest {
 		context.register(secondDemoService);
 
 		EasyRequest request = new EasyRequest(context, new RequestConfigurationFactory());		
-		EasyResponse response = request.to("demo/demo_path_nope").send().get();
+		EasyResponse response = request.to("demo1/demo_path_nope").send().validate().get();
 		
 	}
+	@Ignore
 	@Test
 	public void testApp() throws URISyntaxException {
 		EasyContext context = new EasyApplicationOnAnnotation();

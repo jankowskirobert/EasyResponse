@@ -8,5 +8,5 @@ public interface RequestStream {
 	
 
 	AcceptedRequestStream send();	
-	RequestStream validate() throws EasyRequestException;
+	AcceptedRequestStream validate() throws EasyRequestException;
 }
