@@ -50,8 +50,21 @@ public class AppTest {
 		EasyRequest request = new EasyRequest(context, new RequestConfigurationFactory());
 		EasyResponse response = request.to("bad/nothing").send().validate().get();
 	}
+	
+	@Test(expected=EasyRequestException.class)
+	public void requestThrowsExceptionIfThereIsService_butCantHandleIt() throws URISyntaxException, EasyRequestException {
+		EasyContext context = new EasyApplicationOnAnnotation();
+		// insulation
+		EasyService firstDemoService = new DemoEasyService();		
+		firstDemoService.configurePath("bad");
+		context.register(firstDemoService);
+		// insulation
+		EasyRequest request = new EasyRequest(context, new RequestConfigurationFactory());
+		EasyResponse response = request.to("bad/forSureServiceCantHandleIt").send().validate().get();
+	}
+	
 	@Test
-	public void serviceRequestToOtherService_longAction() throws URISyntaxException, EasyRequestException {
+	public void serviceRequestToValidation_twoGoodRequests() throws URISyntaxException, EasyRequestException {
 		EasyContext context = new EasyApplicationOnAnnotation();
 		EasyService firstDemoService = new DemoEasyService();
 		firstDemoService.configurePath("demo1");
@@ -59,11 +72,11 @@ public class AppTest {
 		secondDemoService.configurePath("demo2");
 		context.register(firstDemoService);
 		context.register(secondDemoService);
-
 		EasyRequest request = new EasyRequest(context, new RequestConfigurationFactory());		
-		EasyResponse response = request.to("demo1/demo_path_nope").send().validate().get();
-		
+		EasyResponse response1 = request.to("demo1/demo_path_nope").send().validate().get();
+		EasyResponse response2 = request.to("demo1/demo_path_yep/ops").send().validate().get();		
 	}
+	
 	@Ignore
 	@Test
 	public void testApp() throws URISyntaxException {

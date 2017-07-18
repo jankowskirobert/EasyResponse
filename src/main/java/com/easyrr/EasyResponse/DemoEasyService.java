@@ -14,7 +14,7 @@ public class DemoEasyService implements EasyService {
 		System.out.println("I WONT BACK");
 	}
 	
-	@EasyRegistredAction(path = "demo_path_yep")
+	@EasyRegistredAction(path = "demo_path_yep/ops")
 	public String simpleMethodWihtReturn(){
 		String response = "I WILL BACK";
 		System.out.println(response);
