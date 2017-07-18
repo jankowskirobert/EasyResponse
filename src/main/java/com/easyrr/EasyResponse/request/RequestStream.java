@@ -5,8 +5,8 @@ import com.easyrr.EasyResponse.ResponseStream;
 
 public interface RequestStream {
 
-	ResponseStream andDoWhenRespond(DemoEasyAction demoEasyAction);
+	
 
-	RequestStream send();	
-	RequestStream validate() throws EasyRequestException;
+	AcceptedRequestStream send();	
+	AcceptedRequestStream validate() throws EasyRequestException;
 }
