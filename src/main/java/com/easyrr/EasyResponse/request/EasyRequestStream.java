@@ -52,7 +52,8 @@ public class EasyRequestStream implements AcceptedRequestStream, RequestObserver
 	}
 
 	public void updateRequestStatus(EasyStatus status) {
-		// TODO Auto-generated method stub		
+		this.status = status;
+		System.out.println(status);
 	}
 
 }

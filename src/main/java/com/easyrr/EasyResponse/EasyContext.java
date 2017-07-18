@@ -10,4 +10,5 @@ public interface EasyContext {
 	public void register(EasyService firstDemoService);
 	public List<EasyService> getRegistredServices();
 	public EasyStatus call(URI path, RequestObserver request);
+	public void resetContext();
 }

@@ -1,6 +1,7 @@
 package com.easyrr.EasyResponse;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.ArrayList;
@@ -9,16 +10,33 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import com.easyrr.EasyResponse.request.RequestObserver;
 
 public class EasyApplicationOnAnnotation implements EasyContext {
 
+	private final Thread mainThread;
+
+	public EasyApplicationOnAnnotation() {
+		super();
+		this.mainThread = new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+
+			}
+		});
+	}
+
 	private static final String PATH_CLASSIFIER = "/";
 	private List<EasyService> registredServices = new ArrayList<EasyService>();
 	private Map<EasyService, List<EasyRegistredAction>> avaliableCommands = new HashMap<EasyService, List<EasyRegistredAction>>();
 	private static final Logger LOG = Logger.getLogger(EasyApplicationOnAnnotation.class.getName());
+	private final ExecutorService executorService = Executors.newFixedThreadPool(10);
 
 	public void register(EasyService firstDemoService) {
 		String servicePath = firstDemoService.getServicePath();
@@ -46,7 +64,7 @@ public class EasyApplicationOnAnnotation implements EasyContext {
 				if (annotation.annotationType().isAssignableFrom(EasyRegistredAction.class)) {
 					EasyRegistredAction action = (EasyRegistredAction) annotation;
 					LOG.info("SCAN FOR ACTION " + action.path());
-					actions.add(action);					
+					actions.add(action);
 				}
 			}
 		}
@@ -61,19 +79,61 @@ public class EasyApplicationOnAnnotation implements EasyContext {
 	}
 
 	public EasyStatus call(URI path, RequestObserver request) {
+
 		int avaliableServices = 0;
 		for (EasyService easyService : registredServices) {
 			if (easyService.getServicePath().equals(servicePathDispatcher(path))) {
 				if (canHandlePath(easyService, path)) {
 					avaliableServices++;
-					Thread remoteTask = new Thread(new Runnable() {
 
-						public void run() {
-
+					Object o = easyService;
+					Class<?> c = easyService.getClass();
+					Method[] methods = c.getDeclaredMethods();
+					for (Method method : methods) {
+						Annotation[] a = method.getAnnotations();
+						if (a.length == 0) {
+							LOG.info("EMPYT ANNOTATIONS ON METHOD: " + method.getName());
+						} else {
+							LOG.info("ANNOTATIONS ON METHOD: " + method.getName());
 						}
-					});
+						for (Annotation annotation : a) {
+							LOG.info("ANNOTATION " + annotation.annotationType() + " ON METHOD: " + method.getName());
+							if (annotation.annotationType().isAssignableFrom(EasyRegistredAction.class)) {
+								EasyRegistredAction action = (EasyRegistredAction) annotation;
+								if (action.path().equals(methodPathDispatcher(path)))
+									try {
+										LOG.info("INVOKE ON METHOD: " + method.getName());
+										executorService.execute(new Runnable() {
+
+											@Override
+											public void run() {
+												try {
+													long timeStart = System.currentTimeMillis();
+													Object ret = method.invoke(o, null);
+													long timeEnd = System.currentTimeMillis();
+													LOG.info("TIME OF METHOD: " + (timeEnd-timeStart));
+												} catch (IllegalAccessException | IllegalArgumentException
+														| InvocationTargetException e) {
+													request.updateRequestStatus(EasyStatus.FAIL);
+												}
+
+											}
+										});
+//										executorService.
+										request.updateRequestStatus(EasyStatus.DONE);
+
+									} catch (IllegalArgumentException e) {
+										LOG.severe("INVOKE FAIL ON METHOD: " + method.getName());
+										request.updateRequestStatus(EasyStatus.FAIL);
+									}
+							}
+						}
+					}
 				}
+
+				// executorService.shutdown();
 			}
+
 		}
 		return (avaliableServices == 0) ? EasyStatus.REJECTED : EasyStatus.ACCEPTED;
 	}
@@ -112,5 +172,11 @@ public class EasyApplicationOnAnnotation implements EasyContext {
 			}
 		}
 		return string;
+	}
+
+	@Override
+	public void resetContext() {
+		registredServices.clear();
+		avaliableCommands.clear();
 	}
 }
