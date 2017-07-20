@@ -16,16 +16,15 @@ public class EasyRequest {
 	}
 
 	public RequestStream to(URI requestPath) {
-		return new EasyRequestStream(context, requestPath);
+		return new EasyStream(context, requestPath);
 	}
 	
-	public ResponseStream onResponseFrom(URI requestPath) {
-		
+	public ResponseStream onResponseFrom(URI requestPath) {		
 		return new EasyResponseStream(requestPath);
 	}
 
 	public RequestStream to(String requestPath) throws URISyntaxException {
-		return new EasyRequestStream(context, requestPath);
+		return new EasyStream(context, requestPath);
 	}
 
 

@@ -2,6 +2,8 @@ package com.easyrr.EasyResponse;
 
 import java.net.URI;
 
+import com.easyrr.EasyResponse.request.EasyRequestException;
+
 public class EasyResponseStream implements ResponseStream {
 
 	private URI requestPath;
@@ -17,6 +19,18 @@ public class EasyResponseStream implements ResponseStream {
 	}
 
 	public EasyResponse get() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ResponseStream validate() throws EasyRequestException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ResponseStream andDoWhenRespond(EasyAction demoEasyAction) {
 		// TODO Auto-generated method stub
 		return null;
 	}
