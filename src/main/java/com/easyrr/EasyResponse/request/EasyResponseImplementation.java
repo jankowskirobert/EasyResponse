@@ -20,11 +20,9 @@ class EasyResponseImplementation implements EasyResponse {
 
 	public void increaseAccepted(EasyStatus status) {
 		if (accepted.containsKey(status)) {
-			LOG.info("INCREASE ACCEPTED");
 			Integer tmp = accepted.get(status);
 			tmp++;
 		} else {
-			LOG.info("PUT INCREASE ACCEPTED");
 			accepted.putIfAbsent(status, 1);
 		}
 	}

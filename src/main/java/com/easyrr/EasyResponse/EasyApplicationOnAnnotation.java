@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -78,25 +79,48 @@ public class EasyApplicationOnAnnotation implements EasyContext {
 		return this.registredServices;
 	}
 
-	public EasyStatus call(URI path, RequestObserver request) {
+	// public void call(URI path, RequestObserver request) {
+	//
+	// int avaliableServices = 0;
+	// for (EasyService easyService : registredServices) {
+	// if (easyService.getServicePath().equals(servicePathDispatcher(path))) {
+	// if (canHandlePath(easyService, path)) {
+	// avaliableServices++;
+	// request.updateRequest(EasyStatus.ACCEPTED, path);
+	// callRequestedMethod(path, request, easyService);
+	// } else {
+	//
+	// }
+	//
+	// // executorService.shutdown();
+	// }
+	//
+	// }
+	//
+	// }
+
+	public void call(URI path, RequestObserver request, Optional<Object[]> params) {
 
 		int avaliableServices = 0;
 		for (EasyService easyService : registredServices) {
 			if (easyService.getServicePath().equals(servicePathDispatcher(path))) {
 				if (canHandlePath(easyService, path)) {
 					avaliableServices++;
-					request.updateRequest(EasyStatus.ACCEPTED,path);
-					callRequestedMethod(path, request, easyService);
+					request.updateRequest(EasyStatus.ACCEPTED, path);
+					callRequestedMethod(path, request, easyService, params);
 				}
-
+				
 				// executorService.shutdown();
 			}
 
 		}
-		return (avaliableServices == 0) ? EasyStatus.REJECTED : EasyStatus.ACCEPTED;
+		if(avaliableServices == 0){
+			request.updateRequest(EasyStatus.REJECTED, path);
+		}
 	}
 
-	private void callRequestedMethod(URI path, RequestObserver request, EasyService easyService) {
+	private void callRequestedMethod(URI path, RequestObserver request, EasyService easyService,
+			Optional<Object[]> params) {
 		Object o = easyService;
 		Class<?> c = easyService.getClass();
 		Method[] methods = c.getDeclaredMethods();
@@ -120,13 +144,13 @@ public class EasyApplicationOnAnnotation implements EasyContext {
 								public void run() {
 									try {
 										long timeStart = System.currentTimeMillis();
-										Object ret = method.invoke(o, null);
+										Object ret = method.invoke(o, params.orElse(new Object[] {}));
 										long timeEnd = System.currentTimeMillis();
 										LOG.info("TIME OF METHOD: " + (timeEnd - timeStart));
-										request.updateRequest(EasyStatus.DONE,path);
+										request.updateRequest(EasyStatus.DONE, path);
 									} catch (IllegalAccessException | IllegalArgumentException
 											| InvocationTargetException e) {
-										request.updateRequest(EasyStatus.FAIL,path);
+										request.updateRequest(EasyStatus.FAIL, path);
 									}
 
 								}
@@ -135,7 +159,7 @@ public class EasyApplicationOnAnnotation implements EasyContext {
 
 						} catch (IllegalArgumentException e) {
 							LOG.severe("INVOKE FAIL ON METHOD: " + method.getName());
-							request.updateRequest(EasyStatus.FAIL,path);
+							request.updateRequest(EasyStatus.FAIL, path);
 						}
 					continue;
 				}

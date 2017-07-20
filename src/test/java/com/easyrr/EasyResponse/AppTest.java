@@ -99,6 +99,7 @@ public class AppTest {
 		EasyResponse response1 = request.to("DEMO/demo_path_nope/sleep").send().get();
 		try {
 			Thread.sleep(5000);
+			
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -146,6 +147,22 @@ public class AppTest {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+		
+	@Test
+	public void serviceRequestValid_responseWithPassedArguments() throws URISyntaxException, EasyRequestException {
+		EasyContext context = new EasyApplicationOnAnnotation();
+		EasyService firstDemoService = new DemoEasyService();
+		firstDemoService.configurePath("demo1");
+		context.register(firstDemoService);
+		EasyRequest request = new EasyRequest(context, new RequestConfigurationFactory());
+		EasyResponse response1 = request.to("demo1/demo_path_nope/args").send("keks", 4).validate().get();
+//		try {
+//			Thread.sleep(40000);
+//		} catch (InterruptedException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 	}
 
 	@Ignore
