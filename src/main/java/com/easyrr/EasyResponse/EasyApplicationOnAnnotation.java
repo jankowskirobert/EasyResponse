@@ -85,50 +85,8 @@ public class EasyApplicationOnAnnotation implements EasyContext {
 			if (easyService.getServicePath().equals(servicePathDispatcher(path))) {
 				if (canHandlePath(easyService, path)) {
 					avaliableServices++;
-
-					Object o = easyService;
-					Class<?> c = easyService.getClass();
-					Method[] methods = c.getDeclaredMethods();
-					for (Method method : methods) {
-						Annotation[] a = method.getAnnotations();
-						if (a.length == 0) {
-							LOG.info("EMPYT ANNOTATIONS ON METHOD: " + method.getName());
-						} else {
-							LOG.info("ANNOTATIONS ON METHOD: " + method.getName());
-						}
-						for (Annotation annotation : a) {
-							LOG.info("ANNOTATION " + annotation.annotationType() + " ON METHOD: " + method.getName());
-							if (annotation.annotationType().isAssignableFrom(EasyRegistredAction.class)) {
-								EasyRegistredAction action = (EasyRegistredAction) annotation;
-								if (action.path().equals(methodPathDispatcher(path)))
-									try {
-										LOG.info("INVOKE ON METHOD: " + method.getName());
-										executorService.execute(new Runnable() {
-
-											@Override
-											public void run() {
-												try {
-													long timeStart = System.currentTimeMillis();
-													Object ret = method.invoke(o, null);
-													long timeEnd = System.currentTimeMillis();
-													LOG.info("TIME OF METHOD: " + (timeEnd-timeStart));
-												} catch (IllegalAccessException | IllegalArgumentException
-														| InvocationTargetException e) {
-													request.updateRequestStatus(EasyStatus.FAIL);
-												}
-
-											}
-										});
-//										executorService.
-										request.updateRequestStatus(EasyStatus.DONE);
-
-									} catch (IllegalArgumentException e) {
-										LOG.severe("INVOKE FAIL ON METHOD: " + method.getName());
-										request.updateRequestStatus(EasyStatus.FAIL);
-									}
-							}
-						}
-					}
+					request.updateRequest(EasyStatus.ACCEPTED,path);
+					callRequestedMethod(path, request, easyService);
 				}
 
 				// executorService.shutdown();
@@ -136,6 +94,53 @@ public class EasyApplicationOnAnnotation implements EasyContext {
 
 		}
 		return (avaliableServices == 0) ? EasyStatus.REJECTED : EasyStatus.ACCEPTED;
+	}
+
+	private void callRequestedMethod(URI path, RequestObserver request, EasyService easyService) {
+		Object o = easyService;
+		Class<?> c = easyService.getClass();
+		Method[] methods = c.getDeclaredMethods();
+		for (Method method : methods) {
+			Annotation[] a = method.getAnnotations();
+			if (a.length == 0) {
+				LOG.info("EMPYT ANNOTATIONS ON METHOD: " + method.getName());
+			} else {
+				LOG.info("ANNOTATIONS ON METHOD: " + method.getName());
+			}
+			for (Annotation annotation : a) {
+				LOG.info("ANNOTATION " + annotation.annotationType() + " ON METHOD: " + method.getName());
+				if (annotation.annotationType().isAssignableFrom(EasyRegistredAction.class)) {
+					EasyRegistredAction action = (EasyRegistredAction) annotation;
+					if (action.path().equals(methodPathDispatcher(path)))
+						try {
+							LOG.info("INVOKE ON METHOD: " + method.getName());
+							executorService.execute(new Runnable() {
+
+								@Override
+								public void run() {
+									try {
+										long timeStart = System.currentTimeMillis();
+										Object ret = method.invoke(o, null);
+										long timeEnd = System.currentTimeMillis();
+										LOG.info("TIME OF METHOD: " + (timeEnd - timeStart));
+										request.updateRequest(EasyStatus.DONE,path);
+									} catch (IllegalAccessException | IllegalArgumentException
+											| InvocationTargetException e) {
+										request.updateRequest(EasyStatus.FAIL,path);
+									}
+
+								}
+							});
+							// executorService.
+
+						} catch (IllegalArgumentException e) {
+							LOG.severe("INVOKE FAIL ON METHOD: " + method.getName());
+							request.updateRequest(EasyStatus.FAIL,path);
+						}
+					continue;
+				}
+			}
+		}
 	}
 
 	private boolean canHandlePath(EasyService easyService, final URI path) {

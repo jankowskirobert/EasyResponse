@@ -1,7 +1,9 @@
 package com.easyrr.EasyResponse.request;
 
+import java.net.URI;
+
 import com.easyrr.EasyResponse.EasyStatus;
 
 public interface RequestObserver {
-	public void updateRequestStatus(EasyStatus status);
+	void updateRequest(EasyStatus status, URI path);
 }

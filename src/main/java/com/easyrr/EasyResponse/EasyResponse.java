@@ -1,5 +1,7 @@
 package com.easyrr.EasyResponse;
 
-public class EasyResponse {
-	private EasyStatus status;
+import java.net.URI;
+
+public interface EasyResponse {
+	public int getAccepted();
 }
