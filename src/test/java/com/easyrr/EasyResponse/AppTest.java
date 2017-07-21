@@ -154,6 +154,7 @@ public class AppTest {
 		}
 	}
 
+	@Ignore
 	@Test()
 	public void serviceRequestValid_responseWithPassedArguments() throws URISyntaxException, EasyRequestException {
 		EasyRequest request = new EasyRequest(context, new RequestConfigurationFactory());
