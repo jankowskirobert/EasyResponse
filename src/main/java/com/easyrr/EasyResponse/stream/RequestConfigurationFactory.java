@@ -1,4 +1,4 @@
-package com.easyrr.EasyResponse.request;
+package com.easyrr.EasyResponse.stream;
 
 public class RequestConfigurationFactory {
 

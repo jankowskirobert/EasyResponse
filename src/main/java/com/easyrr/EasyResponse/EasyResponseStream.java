@@ -2,7 +2,8 @@ package com.easyrr.EasyResponse;
 
 import java.net.URI;
 
-import com.easyrr.EasyResponse.request.EasyRequestException;
+import com.easyrr.EasyResponse.stream.EasyRequestException;
+import com.easyrr.EasyResponse.stream.ResponseStream;
 
 public class EasyResponseStream implements ResponseStream {
 
@@ -18,6 +19,7 @@ public class EasyResponseStream implements ResponseStream {
 		
 	}
 
+	@Override
 	public EasyResponse get() {
 		// TODO Auto-generated method stub
 		return null;
