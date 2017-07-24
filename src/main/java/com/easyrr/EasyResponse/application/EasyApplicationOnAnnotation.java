@@ -1,4 +1,4 @@
-package com.easyrr.EasyResponse;
+package com.easyrr.EasyResponse.application;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
@@ -17,7 +17,11 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
-import com.easyrr.EasyResponse.request.RequestObserver;
+import com.easyrr.EasyResponse.EasyContext;
+import com.easyrr.EasyResponse.EasyMessage;
+import com.easyrr.EasyResponse.EasyService;
+import com.easyrr.EasyResponse.EasyStatus;
+import com.easyrr.EasyResponse.RequestObserver;
 
 public class EasyApplicationOnAnnotation implements EasyContext {
 
@@ -50,7 +54,7 @@ public class EasyApplicationOnAnnotation implements EasyContext {
 	}
 
 	public void call(URI path, RequestObserver request, Optional<Object[]> params) {
-
+		long timeStart = System.currentTimeMillis();
 		int avaliableServices = 0;
 		for (ActionHolder holder : avaliableActions) {
 			EasyService service = holder.getService();
@@ -58,29 +62,29 @@ public class EasyApplicationOnAnnotation implements EasyContext {
 				if (holder.canHandle(methodPathDispatcher(path))) {
 					LOG.info("CAN HANDLE SERVICE: " + service.getServicePath());
 					avaliableServices++;
-					request.updateRequest(EasyStatus.ACCEPTED, path);
+					long timeEnd = System.currentTimeMillis();
+					request.updateRequest(EasyStatus.ACCEPTED, path, Optional.empty());
 					try {
 						executorService.execute(new Runnable() {
+							long timeEnd = System.currentTimeMillis();
 
 							@Override
 							public void run() {
-
 								try {
-									long timeStart = System.currentTimeMillis();
 									holder.callMethod(methodPathDispatcher(path), params.orElse(new Object[] {}));
-									long timeEnd = System.currentTimeMillis();
+									timeEnd = System.currentTimeMillis();
 									LOG.info("TIME OF METHOD: " + (timeEnd - timeStart));
-									request.updateRequest(EasyStatus.DONE, path);
+									request.updateRequest(EasyStatus.DONE, path, Optional.of(timeEnd - timeStart));
 								} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
 										| NullPointerException | NoSuchMethodException | SecurityException e) {
-									request.updateRequest(EasyStatus.FAIL, path);
+									request.updateRequest(EasyStatus.FAIL, path, Optional.of(timeEnd - timeStart));
 									e.printStackTrace();
 								}
-
 							}
 						});
 					} catch (RejectedExecutionException | NullPointerException e) {
-						request.updateRequest(EasyStatus.FAIL, path);
+						timeEnd = System.currentTimeMillis();
+						request.updateRequest(EasyStatus.FAIL, path, Optional.of(timeEnd - timeStart));
 					}
 				} else
 					LOG.info("CAN'T HANDLE SERVICE: " + service.getServicePath());
@@ -88,7 +92,7 @@ public class EasyApplicationOnAnnotation implements EasyContext {
 
 		}
 		if (avaliableServices == 0) {
-			request.updateRequest(EasyStatus.REJECTED, path);
+			request.updateRequest(EasyStatus.REJECTED, path, Optional.empty());
 		}
 	}
 
@@ -114,4 +118,10 @@ public class EasyApplicationOnAnnotation implements EasyContext {
 		registredServices.clear();
 		// avaliableCommands.clear();
 	}
+
+	@Override
+	public void call(EasyMessage message) {
+		
+	}
+
 }

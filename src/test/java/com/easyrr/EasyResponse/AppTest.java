@@ -9,9 +9,10 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import com.easyrr.EasyResponse.request.EasyRequest;
-import com.easyrr.EasyResponse.request.EasyRequestException;
-import com.easyrr.EasyResponse.request.RequestConfigurationFactory;
+import com.easyrr.EasyResponse.application.EasyApplicationOnAnnotation;
+import com.easyrr.EasyResponse.stream.EasyRequest;
+import com.easyrr.EasyResponse.stream.EasyRequestException;
+import com.easyrr.EasyResponse.stream.RequestConfigurationFactory;
 
 /**
  * Unit test for simple App.
@@ -41,26 +42,30 @@ public class AppTest {
 	public void registredServiceIsNotPresentInContext_addOneServiceWithWrongPath() {
 		EasyContext context = new EasyApplicationOnAnnotation();
 		EasyService firstDemoService = new DemoEasyService();
+
 		firstDemoService.configurePath("");
 		context.register(firstDemoService);
 		Assert.assertFalse(context.getRegistredServices().contains(firstDemoService));
+
 		firstDemoService.configurePath(null);
 		context.register(firstDemoService);
 		Assert.assertFalse(context.getRegistredServices().contains(firstDemoService));
 	}
 
 	@Test(expected = EasyRequestException.class)
-	public void requestThrowsExceptionIfThereIsAnyServiceHandleIt() throws URISyntaxException, EasyRequestException {
+	public void requestThrowsExceptionIfThereIsAnyServiceThatCanHandleIt_withValidate_rootPath()
+			throws URISyntaxException, EasyRequestException {
 		EasyContext context = new EasyApplicationOnAnnotation();
 		EasyService firstDemoService = new DemoEasyService();
 		firstDemoService.configurePath("good");
 		context.register(firstDemoService);
 		EasyRequest request = new EasyRequest(context, new RequestConfigurationFactory());
-		EasyResponse response = request.to("bad/nothing").send().validate().get();
+		EasyResponse response = request.to("bad/cant_handle").send().validate().get();
+		Assert.assertTrue(response.getStatus().equals(EasyStatus.REJECTED));
 	}
 
 	@Test(expected = EasyRequestException.class)
-	public void requestThrowsExceptionIfThereIsService_butCantHandleIt()
+	public void requestThrowsExceptionIfThereIsService_butCantHandleIt_withValidate()
 			throws URISyntaxException, EasyRequestException {
 		EasyContext context = new EasyApplicationOnAnnotation();
 		EasyService firstDemoService = new DemoEasyService();
@@ -68,6 +73,31 @@ public class AppTest {
 		context.register(firstDemoService);
 		EasyRequest request = new EasyRequest(context, new RequestConfigurationFactory());
 		EasyResponse response = request.to("bad/forSureServiceCantHandleIt").send().validate().get();
+		Assert.assertTrue(response.getStatus().equals(EasyStatus.REJECTED));
+	}
+
+	@Test()
+	public void requestDoesNotThrowExceptionIfThereIsAnyServiceThatCanHandleIt_withoutValidate_rootPath()
+			throws URISyntaxException, EasyRequestException {
+		EasyContext context = new EasyApplicationOnAnnotation();
+		EasyService firstDemoService = new DemoEasyService();
+		firstDemoService.configurePath("good");
+		context.register(firstDemoService);
+		EasyRequest request = new EasyRequest(context, new RequestConfigurationFactory());
+		EasyResponse response = request.to("bad/cant_handle").send().get();
+		Assert.assertTrue(response.getStatus().equals(EasyStatus.REJECTED));
+	}
+
+	@Test()
+	public void requestDoesNotThrowsExceptionIfThereIsService_butCantHandleIt_withoutValidate()
+			throws URISyntaxException, EasyRequestException {
+		EasyContext context = new EasyApplicationOnAnnotation();
+		EasyService firstDemoService = new DemoEasyService();
+		firstDemoService.configurePath("bad");
+		context.register(firstDemoService);
+		EasyRequest request = new EasyRequest(context, new RequestConfigurationFactory());
+		EasyResponse response = request.to("bad/forSureServiceCantHandleIt").send().get();
+		Assert.assertTrue(response.getStatus().equals(EasyStatus.REJECTED));
 	}
 
 	@Test
@@ -82,9 +112,13 @@ public class AppTest {
 		EasyRequest request = new EasyRequest(context, new RequestConfigurationFactory());
 		EasyResponse response1 = request.to("demo1/demo_path_nope").send().validate().get();
 		EasyResponse response2 = request.to("demo1/demo_path_yep/ops").send().validate().get();
-		System.out.println("HERE:" + response1.getAccepted());
+		System.out.println("HERE1: " + response1.getAccepted() + " " + response1.getExecutionTimeMillis());
+		Assert.assertTrue(response1.getStatus().equals(EasyStatus.DONE));
+		System.out.println("HERE2: " + response2.getAccepted() + " " + response2.getExecutionTimeMillis());
+		Assert.assertTrue(response2.getStatus().equals(EasyStatus.DONE));
 	}
 
+	@Ignore
 	@Test
 	public void serviceRequestValid_betweenService() throws URISyntaxException {
 		EasyContext context = new EasyApplicationOnAnnotation();
@@ -110,6 +144,7 @@ public class AppTest {
 		}
 	}
 
+	@Ignore
 	@Test
 	public void serviceRequestValid_actionAfterTaskComplete() throws URISyntaxException, EasyRequestException {
 		EasyContext context = new EasyApplicationOnAnnotation();
@@ -175,7 +210,6 @@ public class AppTest {
 	public void testApp() throws URISyntaxException {
 		EasyContext context = new EasyApplicationOnAnnotation();
 		long responseTimeout = 1000; // ms
-
 		// insulation
 		EasyService firstDemoService = new DemoEasyService();
 		context.register(firstDemoService);

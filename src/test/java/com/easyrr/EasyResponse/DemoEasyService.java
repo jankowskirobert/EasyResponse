@@ -3,9 +3,9 @@ package com.easyrr.EasyResponse;
 import java.net.URISyntaxException;
 import java.util.Random;
 
-import com.easyrr.EasyResponse.request.EasyRequest;
-import com.easyrr.EasyResponse.request.EasyRequestException;
-import com.easyrr.EasyResponse.request.RequestConfigurationFactory;
+import com.easyrr.EasyResponse.stream.EasyRequest;
+import com.easyrr.EasyResponse.stream.EasyRequestException;
+import com.easyrr.EasyResponse.stream.RequestConfigurationFactory;
 
 public class DemoEasyService implements EasyService {
 

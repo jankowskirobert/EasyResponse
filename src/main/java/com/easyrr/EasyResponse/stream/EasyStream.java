@@ -1,4 +1,4 @@
-package com.easyrr.EasyResponse.request;
+package com.easyrr.EasyResponse.stream;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -12,9 +12,10 @@ import com.easyrr.EasyResponse.EasyAction;
 import com.easyrr.EasyResponse.EasyContext;
 import com.easyrr.EasyResponse.EasyResponse;
 import com.easyrr.EasyResponse.EasyStatus;
-import com.easyrr.EasyResponse.ResponseStream;
+import com.easyrr.EasyResponse.RequestObserver;
 
-class EasyStream implements RequestStream, RequestObserver, ResponseStream {
+
+class EasyStream extends Observable implements RequestStream, RequestObserver, ResponseStream {
 
 	private EasyContext context;
 	private final URI requestPath;
@@ -30,10 +31,10 @@ class EasyStream implements RequestStream, RequestObserver, ResponseStream {
 
 	EasyStream(EasyContext context, URI requestPath) {
 		this.context = context;
-		this.requestPath = requestPath;
-		this.response = new EasyResponseImplementation(requestPath.getPath());
+		this.requestPath = requestPath;		
 		this.status = EasyStatus.NEW;
-		// this.response.
+		this.response = new EasyResponseImplementation(requestPath.getPath(), this.status);
+		this.addObserver(response);
 	}
 
 	public ResponseStream andDoWhenRespond(EasyAction demoEasyAction) {
@@ -45,11 +46,6 @@ class EasyStream implements RequestStream, RequestObserver, ResponseStream {
 		return response;
 	}
 
-//	public ResponseStream send() {
-//		context.call(requestPath, this);
-//		return this;
-//	}
-
 	public ResponseStream validate() throws EasyRequestException {
 		if (status.equals(EasyStatus.REJECTED)) {
 			throw new EasyRequestException("Request Rejected");
@@ -57,22 +53,25 @@ class EasyStream implements RequestStream, RequestObserver, ResponseStream {
 			return this;
 	}
 
-	public void updateRequest(EasyStatus status, URI path) {
+	public void updateRequest(EasyStatus status, URI path, Optional<Long> time) {
 		this.status = status;
+		this.setChanged();
+		this.notifyObservers(status);
 		LOG.info("UPDATE REQUEST: " + status);
 		if (path.getPath().equals(requestPath.getPath())) {
 			LOG.info("UPDATE REQUEST: " + status);
 			switch (status) {
 			case ACCEPTED:
 				LOG.info("UPDATE REQUEST: " + status);
-				response.increaseAccepted(status);
+				response.increaseAccepted(status, time.orElse((long) 0));
 				break;
 			case FAIL:
 				break;
 			case DONE:
 				if (demoEasyAction != null) {
-					demoEasyAction.execute();
+					demoEasyAction.execute(response);
 				}
+//				response.increaseAccepted(status, time.orElse((long) 0));
 				break;
 			case REJECTED:
 				break;
@@ -83,7 +82,7 @@ class EasyStream implements RequestStream, RequestObserver, ResponseStream {
 				break;
 			}
 		}
-
+		
 	}
 
 	@Override

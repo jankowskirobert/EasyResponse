@@ -1,4 +1,4 @@
-package com.easyrr.EasyResponse;
+package com.easyrr.EasyResponse.application;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
@@ -12,6 +12,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Logger;
+
+import com.easyrr.EasyResponse.EasyRegistredAction;
+import com.easyrr.EasyResponse.EasyService;
 
 class ActionHolder {
 	private EasyService service;
@@ -51,18 +54,21 @@ class ActionHolder {
 
 	void callMethod(String path, Object[] obj) throws IllegalAccessException, IllegalArgumentException,
 			InvocationTargetException, NullPointerException, NoSuchMethodException, SecurityException {
-
-		for (Map.Entry<String, Method> object : avaliableServices.entrySet()) {
-			LOG.info(object.getKey() + " " + object.getValue());
+		//
+		// for (Map.Entry<String, Method> object : avaliableServices.entrySet())
+		// {
+		// LOG.info(object.getKey() + " " + object.getValue());
+		// }
+		synchronized (this) {
+			Method method = avaliableServices.get(path);
+			if (method != null) {
+				// method.invoke(service, obj);
+				LOG.info("METHOD TO INVOKE: " + method.getName());
+				Object returnedValue = method.invoke(service, obj);
+			} else
+				throw new NullPointerException("TRIED TO FIND AND INVOKE: " + path);
 		}
 
-		Method method = avaliableServices.get(path);
-		if (method != null) {
-			method.invoke(service, obj);
-			LOG.info("METHOD TO INVOKE: " + method.getName());
-			Object returnedValue = method.invoke(service, obj);
-		} else
-			throw new NullPointerException("TRIED TO FIND AND INVOKE: " + path);
 	}
 
 	boolean canHandle(String path) {
