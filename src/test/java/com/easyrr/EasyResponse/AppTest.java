@@ -1,5 +1,6 @@
 package com.easyrr.EasyResponse;
 
+import java.lang.annotation.Repeatable;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -19,10 +20,13 @@ public class AppTest {
 
 	EasyContext context = new EasyApplicationOnAnnotation();
 
-	// @Before
-	// public void setUp(){
-	// context
-	// }
+	EasyService firstDemoService = new DemoEasyService();
+
+	@Before
+	public void setUp() {
+		firstDemoService.configurePath("demo1");
+		context.register(firstDemoService);
+	}
 
 	@Test
 	public void registredServiceIsPresentInContext_addOneService() {
@@ -78,7 +82,7 @@ public class AppTest {
 		EasyRequest request = new EasyRequest(context, new RequestConfigurationFactory());
 		EasyResponse response1 = request.to("demo1/demo_path_nope").send().validate().get();
 		EasyResponse response2 = request.to("demo1/demo_path_yep/ops").send().validate().get();
-		System.out.println("HERE:"+response1.getAccepted());
+		System.out.println("HERE:" + response1.getAccepted());
 	}
 
 	@Test
@@ -99,12 +103,13 @@ public class AppTest {
 		EasyResponse response1 = request.to("DEMO/demo_path_nope/sleep").send().get();
 		try {
 			Thread.sleep(5000);
+
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
-	
+
 	@Test
 	public void serviceRequestValid_actionAfterTaskComplete() throws URISyntaxException, EasyRequestException {
 		EasyContext context = new EasyApplicationOnAnnotation();
@@ -120,17 +125,18 @@ public class AppTest {
 		workerDemoService.simpleMethod();
 		workerDemoService.simpleMethod();
 		EasyRequest request = new EasyRequest(context, new RequestConfigurationFactory());
-		EasyResponse response1 = request.to("DEMO/demo_path_nope/sleep").send().validate().andDoWhenRespond(new DemoEasyAction()).get();
-		
+		EasyResponse response1 = request.to("DEMO/demo_path_nope/sleep").send().validate()
+				.andDoWhenRespond(new DemoEasyAction()).get();
+
 		try {
 			Thread.sleep(7000);
-			System.out.println("HERE:"+response1.getAccepted());
+			System.out.println("HERE:" + response1.getAccepted());
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
-	
+
 	@Ignore
 	@Test
 	public void serviceRequestValid_responseAfter1s() throws URISyntaxException, EasyRequestException {
@@ -149,6 +155,22 @@ public class AppTest {
 	}
 
 	@Ignore
+	@Test()
+	public void serviceRequestValid_responseWithPassedArguments() throws URISyntaxException, EasyRequestException {
+		EasyRequest request = new EasyRequest(context, new RequestConfigurationFactory());
+		for (int i = 0; i < 9000; i++) {
+
+			EasyResponse response1 = request.to("demo1/demo_path_nope/args").send("keks", 4).validate().get();
+			// try {
+			// Thread.sleep(40000);
+			// } catch (InterruptedException e) {
+			// // TODO Auto-generated catch block
+			// e.printStackTrace();
+			// }
+		}
+	}
+
+	@Ignore
 	@Test
 	public void testApp() throws URISyntaxException {
 		EasyContext context = new EasyApplicationOnAnnotation();
@@ -162,7 +184,7 @@ public class AppTest {
 		EasyRequest request = new EasyRequest(context, new RequestConfigurationFactory());
 		URI requestPath = new URI("demo/demo_path_nope");
 		EasyResponse response = request.to(requestPath).send().andDoWhenRespond(new DemoEasyAction()).get();
-//		request.onResponseFrom(requestPath).thenDo(new DemoEasyAction());
+		// request.onResponseFrom(requestPath).thenDo(new DemoEasyAction());
 		ResponseWithTimeout responseWithTimeOut = new ResponseWithTimeout(responseTimeout);
 	}
 }

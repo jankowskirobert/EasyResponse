@@ -21,10 +21,23 @@ public class DemoEasyService implements EasyService {
 		try {
 			EasyRequest request = new EasyRequest(context, new RequestConfigurationFactory());
 			EasyResponse response1 = request.to("GUI/increase_value").send().get();
-		} catch ( URISyntaxException e) {
+		} catch (URISyntaxException e) {
 			e.printStackTrace();
 		}
 		System.out.println("I WONT BACK");
+	}
+
+	@EasyRegistredAction(path = "demo_path_nope/args")
+	public void simpleMethod_args(String dupa, int i) {
+		// try {
+		// EasyRequest request = new EasyRequest(context, new
+		// RequestConfigurationFactory());
+		// EasyResponse response1 =
+		// request.to("GUI/increase_value").send().get();
+		// } catch ( URISyntaxException e) {
+		// e.printStackTrace();
+		// }
+		System.out.println("WOWW: " + dupa + " " + i);
 	}
 
 	@EasyRegistredAction(path = "demo_path_nope/sleep")

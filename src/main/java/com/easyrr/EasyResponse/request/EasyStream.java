@@ -4,6 +4,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 import com.easyrr.EasyResponse.DemoEasyAction;
@@ -16,7 +17,7 @@ import com.easyrr.EasyResponse.ResponseStream;
 class EasyStream implements RequestStream, RequestObserver, ResponseStream {
 
 	private EasyContext context;
-	private URI requestPath;
+	private final URI requestPath;
 	private EasyStatus status;
 	private EasyAction demoEasyAction;
 	private final EasyResponseImplementation response;
@@ -31,6 +32,7 @@ class EasyStream implements RequestStream, RequestObserver, ResponseStream {
 		this.context = context;
 		this.requestPath = requestPath;
 		this.response = new EasyResponseImplementation(requestPath.getPath());
+		this.status = EasyStatus.NEW;
 		// this.response.
 	}
 
@@ -43,10 +45,10 @@ class EasyStream implements RequestStream, RequestObserver, ResponseStream {
 		return response;
 	}
 
-	public ResponseStream send() {
-		status = context.call(requestPath, this);
-		return this;
-	}
+//	public ResponseStream send() {
+//		context.call(requestPath, this);
+//		return this;
+//	}
 
 	public ResponseStream validate() throws EasyRequestException {
 		if (status.equals(EasyStatus.REJECTED)) {
@@ -82,6 +84,12 @@ class EasyStream implements RequestStream, RequestObserver, ResponseStream {
 			}
 		}
 
+	}
+
+	@Override
+	public ResponseStream send(Object... objects) {
+		context.call(requestPath, this, Optional.ofNullable(objects));
+		return this;
 	}
 
 }
