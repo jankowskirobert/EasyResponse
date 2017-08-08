@@ -86,7 +86,7 @@ class EasyStream extends Observable implements RequestStream, RequestObserver, R
 	}
 
 	@Override
-	public ResponseStream send(Object... objects) {
+	public ResponseStream sendSync(Object... objects) {
 		context.call(requestPath, this, Optional.ofNullable(objects));
 		return this;
 	}

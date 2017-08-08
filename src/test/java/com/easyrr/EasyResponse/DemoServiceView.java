@@ -39,7 +39,7 @@ public class DemoServiceView extends JFrame implements EasyService {
 		this.path = path;
 	}
 
-	@EasyRegistredAction(path = "increase_value")
+	@EasyRegistredAction(request = "increase_value")
 	public void increaseValue() {
 		
 		value++;

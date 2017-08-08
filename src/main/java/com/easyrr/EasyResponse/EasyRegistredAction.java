@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
 @Target(METHOD)
 public @interface EasyRegistredAction {
 
-	String path();
+	String request();
 	
 	/**
 	 * Specify recivers of this registred action, if non then all biders will reveice 

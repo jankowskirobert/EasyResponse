@@ -13,7 +13,9 @@ public class EasyRequest {
 	public EasyRequest(EasyContext context, RequestConfigurationFactory requestConfigurationFactory) {
 		this.context = context;
 	}
-
+	public EasyRequest(EasyContext context) {
+		this.context = context;
+	}
 	public RequestStream to(URI requestPath) {
 		return new EasyStream(context, requestPath);
 	}

@@ -44,9 +44,9 @@ class ActionHolder {
 			for (Annotation annotation : a) {
 				if (annotation.annotationType().isAssignableFrom(EasyRegistredAction.class)) {
 					EasyRegistredAction action = (EasyRegistredAction) annotation;
-					LOG.info("REGISTER SERVICE: " + service.getServicePath() + " PATH: " + action.path() + " METHOD: "
+					LOG.info("REGISTER SERVICE: " + service.getServicePath() + " PATH: " + action.request() + " METHOD: "
 							+ method.getName());
-					avaliableServices.put(action.path(), method);
+					avaliableServices.put(action.request(), method);
 				}
 			}
 		}

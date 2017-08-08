@@ -60,7 +60,7 @@ public class AppTest {
 		firstDemoService.configurePath("good");
 		context.register(firstDemoService);
 		EasyRequest request = new EasyRequest(context, new RequestConfigurationFactory());
-		EasyResponse response = request.to("bad/cant_handle").send().validate().get();
+		EasyResponse response = request.to("bad/cant_handle").sendSync().validate().get();
 		Assert.assertTrue(response.getStatus().equals(EasyStatus.REJECTED));
 	}
 
@@ -72,7 +72,7 @@ public class AppTest {
 		firstDemoService.configurePath("bad");
 		context.register(firstDemoService);
 		EasyRequest request = new EasyRequest(context, new RequestConfigurationFactory());
-		EasyResponse response = request.to("bad/forSureServiceCantHandleIt").send().validate().get();
+		EasyResponse response = request.to("bad/forSureServiceCantHandleIt").sendSync().validate().get();
 		Assert.assertTrue(response.getStatus().equals(EasyStatus.REJECTED));
 	}
 
@@ -84,7 +84,7 @@ public class AppTest {
 		firstDemoService.configurePath("good");
 		context.register(firstDemoService);
 		EasyRequest request = new EasyRequest(context, new RequestConfigurationFactory());
-		EasyResponse response = request.to("bad/cant_handle").send().get();
+		EasyResponse response = request.to("bad/cant_handle").sendSync().get();
 		Assert.assertTrue(response.getStatus().equals(EasyStatus.REJECTED));
 	}
 
@@ -96,7 +96,7 @@ public class AppTest {
 		firstDemoService.configurePath("bad");
 		context.register(firstDemoService);
 		EasyRequest request = new EasyRequest(context, new RequestConfigurationFactory());
-		EasyResponse response = request.to("bad/forSureServiceCantHandleIt").send().get();
+		EasyResponse response = request.to("bad/forSureServiceCantHandleIt").sendSync().get();
 		Assert.assertTrue(response.getStatus().equals(EasyStatus.REJECTED));
 	}
 
@@ -110,8 +110,8 @@ public class AppTest {
 		context.register(firstDemoService);
 		context.register(secondDemoService);
 		EasyRequest request = new EasyRequest(context, new RequestConfigurationFactory());
-		EasyResponse response1 = request.to("demo1/demo_path_nope").send().validate().get();
-		EasyResponse response2 = request.to("demo1/demo_path_yep/ops").send().validate().get();
+		EasyResponse response1 = request.to("demo1/demo_path_nope").sendSync().validate().get();
+		EasyResponse response2 = request.to("demo1/demo_path_yep/ops").sendSync().validate().get();
 		System.out.println("HERE1: " + response1.getAccepted() + " " + response1.getExecutionTimeMillis());
 		Assert.assertTrue(response1.getStatus().equals(EasyStatus.DONE));
 		System.out.println("HERE2: " + response2.getAccepted() + " " + response2.getExecutionTimeMillis());
@@ -134,7 +134,7 @@ public class AppTest {
 		workerDemoService.simpleMethod();
 		workerDemoService.simpleMethod();
 		EasyRequest request = new EasyRequest(context, new RequestConfigurationFactory());
-		EasyResponse response1 = request.to("DEMO/demo_path_nope/sleep").send().get();
+		EasyResponse response1 = request.to("DEMO/demo_path_nope/sleep").sendSync().get();
 		try {
 			Thread.sleep(5000);
 
@@ -160,7 +160,7 @@ public class AppTest {
 		workerDemoService.simpleMethod();
 		workerDemoService.simpleMethod();
 		EasyRequest request = new EasyRequest(context, new RequestConfigurationFactory());
-		EasyResponse response1 = request.to("DEMO/demo_path_nope/sleep").send().validate()
+		EasyResponse response1 = request.to("DEMO/demo_path_nope/sleep").sendSync().validate()
 				.andDoWhenRespond(new DemoEasyAction()).get();
 
 		try {
@@ -180,7 +180,7 @@ public class AppTest {
 		firstDemoService.configurePath("demo1");
 		context.register(firstDemoService);
 		EasyRequest request = new EasyRequest(context, new RequestConfigurationFactory());
-		EasyResponse response1 = request.to("demo1/demo_path_nope/sleep").send().validate().get();
+		EasyResponse response1 = request.to("demo1/demo_path_nope/sleep").sendSync().validate().get();
 		try {
 			Thread.sleep(40000);
 		} catch (InterruptedException e) {
@@ -195,7 +195,7 @@ public class AppTest {
 		EasyRequest request = new EasyRequest(context, new RequestConfigurationFactory());
 		for (int i = 0; i < 9000; i++) {
 
-			EasyResponse response1 = request.to("demo1/demo_path_nope/args").send("keks", 4).validate().get();
+			EasyResponse response1 = request.to("demo1/demo_path_nope/args").sendSync("keks", 4).validate().get();
 			// try {
 			// Thread.sleep(40000);
 			// } catch (InterruptedException e) {
@@ -217,7 +217,7 @@ public class AppTest {
 
 		EasyRequest request = new EasyRequest(context, new RequestConfigurationFactory());
 		URI requestPath = new URI("demo/demo_path_nope");
-		EasyResponse response = request.to(requestPath).send().andDoWhenRespond(new DemoEasyAction()).get();
+		EasyResponse response = request.to(requestPath).sendSync().andDoWhenRespond(new DemoEasyAction()).get();
 		// request.onResponseFrom(requestPath).thenDo(new DemoEasyAction());
 		ResponseWithTimeout responseWithTimeOut = new ResponseWithTimeout(responseTimeout);
 	}
