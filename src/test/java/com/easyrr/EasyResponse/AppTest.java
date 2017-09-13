@@ -20,7 +20,6 @@ import com.easyrr.EasyResponse.stream.RequestConfigurationFactory;
 public class AppTest {
 
 	EasyContext context = new EasyApplicationOnAnnotation();
-
 	EasyService firstDemoService = new DemoEasyService();
 
 	@Before
